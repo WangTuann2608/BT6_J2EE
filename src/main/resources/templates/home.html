@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{_layout :: head('Trang chủ')}"></head>
+<body th:replace="~{_layout :: shell('Trang chủ', 'Điểm vào chính sau khi đăng nhập thành công.', ~{::content})}">
+<section th:fragment="content">
+    <section class="hero">
+        <article class="hero-card">
+            <h2 th:text="'Xin chào, ' + ${username} + '!'">Xin chào!</h2>
+            <p>
+                Bạn đã đăng nhập thành công vào hệ thống quản lý sản phẩm. Từ đây bạn có thể đi tới
+                danh sách sản phẩm hoặc đăng xuất khỏi phiên làm việc hiện tại.
+            </p>
+        </article>
+
+        <aside class="stat-card">
+            <span class="stat-label">Vai trò hiện tại</span>
+            <div class="stat-value" sec:authorize="hasRole('ADMIN')">ADMIN</div>
+            <div class="stat-value" sec:authorize="hasRole('USER') and !hasRole('ADMIN')">USER</div>
+            <div class="stat-note">Phân quyền được đọc từ Spring Security</div>
+        </aside>
+    </section>
+
+    <section class="content-card">
+        <div class="section-head">
+            <div>
+                <h3>Điều hướng nhanh</h3>
+                <p>Chọn hành động tiếp theo theo quyền hiện tại của tài khoản.</p>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a class="btn btn-primary" th:href="@{/products}">Xem danh sách sản phẩm</a>
+            <a class="btn btn-secondary" th:href="@{/products/add}" sec:authorize="hasRole('ADMIN')">Thêm sản phẩm</a>
+        </div>
+    </section>
+
+    <section class="content-card">
+        <div class="section-head">
+            <div>
+                <h3>Danh mục sản phẩm</h3>
+                <p>Các danh mục đang có trong hệ thống.</p>
+            </div>
+        </div>
+
+        <div class="empty-state" th:if="${#lists.isEmpty(categories)}">
+            Chưa có danh mục nào.
+        </div>
+
+        <table class="product-table" th:if="${not #lists.isEmpty(categories)}">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tên danh mục</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="cat : ${categories}">
+                <td th:text="${cat.id}">1</td>
+                <td th:text="${cat.name}">Tên danh mục</td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+</section>
+</body>
+</html>

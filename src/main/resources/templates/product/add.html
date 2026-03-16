@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{_layout :: head('Thêm sản phẩm')}"></head>
+<body th:replace="~{_layout :: shell('Thêm sản phẩm', 'Điền thông tin sản phẩm mới trước khi lưu vào cơ sở dữ liệu.', ~{::content})}">
+<section th:fragment="content">
+    <section class="hero">
+        <article class="hero-card">
+            <h2>Tạo một sản phẩm mới</h2>
+            <p>Biểu mẫu này dùng trực tiếp object `product` và danh sách `categories` từ controller để lưu sản phẩm mới.</p>
+        </article>
+
+        <aside class="stat-card">
+            <span class="stat-label">Danh mục sẵn có</span>
+            <div class="stat-value" th:text="${#lists.size(categories)}">0</div>
+            <div class="stat-note">Chọn đúng danh mục trước khi lưu</div>
+        </aside>
+    </section>
+
+    <section class="content-card">
+        <div class="section-head">
+            <div>
+                <h3>Thông tin sản phẩm</h3>
+                <p>Những trường bên dưới sẽ được gửi về endpoint lưu sản phẩm hiện tại.</p>
+            </div>
+        </div>
+
+        <form th:action="@{/products/save}" th:object="${product}" method="post">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="name">Tên sản phẩm</label>
+                    <input id="name" type="text" th:field="*{name}" placeholder="Ví dụ: iPhone 15" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="price">Giá</label>
+                    <input id="price" type="number" th:field="*{price}" min="1" max="9999999" placeholder="Nhập giá sản phẩm" required>
+                </div>
+
+                <div class="form-group form-group-full">
+                    <label for="image">Tên file hình ảnh</label>
+                    <input id="image" type="text" th:field="*{image}" maxlength="200" placeholder="product-image.jpg">
+                    <span class="hint">Có thể nhập tên file, URL ảnh hoặc để trống nếu chưa có ảnh.</span>
+                </div>
+
+                <div class="form-group form-group-full">
+                    <label for="category">Danh mục</label>
+                    <select id="category" name="category.id" required>
+                        <option value="">Chọn danh mục</option>
+                        <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn btn-primary" type="submit">Lưu sản phẩm</button>
+                <a class="btn btn-secondary" th:href="@{/products}">Quay lại danh sách</a>
+            </div>
+        </form>
+    </section>
+</section>
+</body>
+</html>

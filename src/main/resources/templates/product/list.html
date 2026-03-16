@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{_layout :: head('Danh sách sản phẩm')}"></head>
+<body th:replace="~{_layout :: shell('Danh sách sản phẩm', 'Không gian quản lý sản phẩm với phân quyền user và admin.', ~{::content})}">
+<section th:fragment="content">
+    <section class="hero">
+        <article class="hero-card">
+            <h2>Kho sản phẩm đang được bảo vệ bởi Spring Security</h2>
+            <p>
+                Người dùng có thể xem danh sách, còn quản trị viên có thể thêm, sửa và xóa sản phẩm.
+                Giao diện này bám trực tiếp vào dữ liệu Thymeleaf từ controller hiện tại.
+            </p>
+        </article>
+
+        <aside class="stat-card">
+            <span class="stat-label">Tổng số sản phẩm</span>
+            <div class="stat-value" th:text="${#lists.size(products)}">0</div>
+            <div class="stat-note">Cập nhật trực tiếp từ cơ sở dữ liệu</div>
+        </aside>
+    </section>
+
+    <section class="table-card">
+        <div class="section-head">
+            <div>
+                <h3>Bảng sản phẩm</h3>
+                <p>Thông tin tên, giá, hình ảnh và danh mục đang có trong hệ thống.</p>
+            </div>
+            <a class="btn btn-primary" th:href="@{/products/add}" sec:authorize="hasRole('ADMIN')">Tạo sản phẩm mới</a>
+        </div>
+
+        <div class="empty-state" th:if="${#lists.isEmpty(products)}">
+            Chưa có sản phẩm nào. Hãy thêm dữ liệu đầu tiên để bắt đầu quản lý.
+        </div>
+
+        <table class="product-table" th:if="${not #lists.isEmpty(products)}">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Sản phẩm</th>
+                <th>Giá</th>
+                <th>Hình ảnh</th>
+                <th>Danh mục</th>
+                <th sec:authorize="hasRole('ADMIN')">Thao tác</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="product : ${products}">
+                <td th:text="${product.id}">1</td>
+                <td>
+                    <div class="product-name" th:text="${product.name}">Tên sản phẩm</div>
+                </td>
+                <td th:text="${product.price} + ' VND'">100000 VND</td>
+                <td>
+                    <span class="product-meta" th:text="${product.image != null and !#strings.isEmpty(product.image) ? product.image : 'Chưa có ảnh'}">image.jpg</span>
+                </td>
+                <td>
+                    <span class="product-meta" th:text="${product.category != null ? product.category.name : 'Chưa phân loại'}">Danh mục</span>
+                </td>
+                <td sec:authorize="hasRole('ADMIN')">
+                    <div class="row-actions">
+                        <a class="row-link" th:href="@{/products/edit/{id}(id=${product.id})}">Sửa</a>
+                        <a class="row-link row-link-danger" th:href="@{/products/delete/{id}(id=${product.id})}" onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này không?');">Xóa</a>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+</section>
+</body>
+</html>

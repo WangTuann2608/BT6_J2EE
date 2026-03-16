@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head(pageTitle)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle} + ' | BT6 Security'">BT6 Security</title>
+    <style>
+        :root {
+            --bg: #f4efe7;
+            --bg-accent: #e6d5c3;
+            --panel: rgba(255, 252, 247, 0.92);
+            --panel-strong: #fffaf3;
+            --text: #201a17;
+            --muted: #6e5c52;
+            --line: rgba(53, 38, 29, 0.12);
+            --brand: #b6542e;
+            --brand-dark: #8f3e20;
+            --accent: #264653;
+            --danger: #a63446;
+            --shadow: 0 24px 80px rgba(63, 39, 24, 0.12);
+            --radius-lg: 28px;
+            --radius-md: 18px;
+            --radius-sm: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Be Vietnam Pro", "Segoe UI", sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(182, 84, 46, 0.18), transparent 30%),
+                radial-gradient(circle at right 20%, rgba(38, 70, 83, 0.14), transparent 24%),
+                linear-gradient(180deg, var(--bg) 0%, #f8f4ee 52%, #efe5da 100%);
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .app-shell {
+            width: min(1160px, calc(100% - 32px));
+            margin: 32px auto;
+            padding: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 32px;
+            background: rgba(255, 250, 243, 0.72);
+            backdrop-filter: blur(18px);
+            box-shadow: var(--shadow);
+        }
+
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 26px;
+        }
+
+        .brand {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .brand-tag {
+            width: fit-content;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(182, 84, 46, 0.12);
+            color: var(--brand-dark);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .brand h1 {
+            margin: 0;
+            font-size: clamp(28px, 4vw, 42px);
+            line-height: 1.05;
+        }
+
+        .brand p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        .header-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-link,
+        .btn,
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+        }
+
+        .nav-link,
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 16px;
+            border-radius: 999px;
+            font-weight: 600;
+        }
+
+        .nav-link {
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid var(--line);
+        }
+
+        .btn-primary {
+            color: #fff;
+            background: linear-gradient(135deg, var(--brand) 0%, #cf7140 100%);
+            box-shadow: 0 14px 32px rgba(182, 84, 46, 0.24);
+        }
+
+        .btn-secondary {
+            background: rgba(38, 70, 83, 0.08);
+            color: var(--accent);
+            border: 1px solid rgba(38, 70, 83, 0.12);
+        }
+
+        .btn-danger {
+            color: #fff;
+            background: linear-gradient(135deg, var(--danger) 0%, #d95866 100%);
+            box-shadow: 0 14px 32px rgba(166, 52, 70, 0.22);
+        }
+
+        .nav-link:hover,
+        .btn:hover,
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1.6fr) minmax(280px, 0.85fr);
+            gap: 22px;
+            margin-bottom: 24px;
+        }
+
+        .hero-card,
+        .stat-card,
+        .content-card,
+        .table-card {
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: var(--radius-lg);
+            background: var(--panel);
+            box-shadow: 0 16px 42px rgba(49, 34, 23, 0.08);
+        }
+
+        .hero-card {
+            padding: 30px;
+        }
+
+        .hero-card h2 {
+            margin: 0 0 10px;
+            font-size: clamp(26px, 3vw, 38px);
+            line-height: 1.1;
+        }
+
+        .hero-card p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .stat-card {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: linear-gradient(180deg, rgba(255, 250, 243, 0.95), rgba(230, 213, 195, 0.86));
+        }
+
+        .stat-label {
+            color: var(--muted);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .stat-value {
+            font-size: clamp(40px, 7vw, 64px);
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .stat-note {
+            color: var(--accent);
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .content-card,
+        .table-card {
+            padding: 24px;
+        }
+
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .section-head h3 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .section-head p {
+            margin: 4px 0 0;
+            color: var(--muted);
+        }
+
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .product-table th,
+        .product-table td {
+            padding: 16px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--line);
+            vertical-align: middle;
+        }
+
+        .product-table th {
+            color: var(--muted);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .product-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .product-name {
+            font-weight: 700;
+        }
+
+        .product-meta {
+            display: inline-flex;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(38, 70, 83, 0.08);
+            color: var(--accent);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .row-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .row-link {
+            padding: 10px 14px;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 600;
+            border: 1px solid var(--line);
+            background: #fff;
+        }
+
+        .row-link-danger {
+            color: var(--danger);
+            border-color: rgba(166, 52, 70, 0.18);
+            background: rgba(166, 52, 70, 0.06);
+        }
+
+        .empty-state {
+            padding: 28px;
+            border-radius: 22px;
+            border: 1px dashed rgba(38, 70, 83, 0.2);
+            background: rgba(38, 70, 83, 0.03);
+            text-align: center;
+            color: var(--muted);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group-full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid rgba(53, 38, 29, 0.14);
+            border-radius: var(--radius-sm);
+            background: var(--panel-strong);
+            color: var(--text);
+            font: inherit;
+            outline: none;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: rgba(182, 84, 46, 0.5);
+            box-shadow: 0 0 0 4px rgba(182, 84, 46, 0.12);
+        }
+
+        .hint {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .form-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .footer-note {
+            margin-top: 20px;
+            color: var(--muted);
+            font-size: 13px;
+            text-align: center;
+        }
+
+        @media (max-width: 900px) {
+            .app-header,
+            .hero,
+            .section-head {
+                grid-template-columns: 1fr;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-actions {
+                justify-content: flex-start;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .app-shell {
+                width: min(100% - 20px, 100%);
+                margin: 10px;
+                padding: 18px;
+                border-radius: 24px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .product-table,
+            .product-table tbody,
+            .product-table tr,
+            .product-table td {
+                display: block;
+                width: 100%;
+            }
+
+            .product-table thead {
+                display: none;
+            }
+
+            .product-table tr {
+                padding: 14px;
+                margin-bottom: 14px;
+                border: 1px solid var(--line);
+                border-radius: 18px;
+                background: rgba(255, 255, 255, 0.72);
+            }
+
+            .product-table td {
+                padding: 8px 0;
+                border-bottom: none;
+            }
+        }
+    </style>
+</head>
+<body>
+<div th:fragment="shell(pageTitle, pageSubtitle, content)">
+    <div class="app-shell">
+        <header class="app-header">
+            <div class="brand">
+                <span class="brand-tag">BT6 Security</span>
+                <h1 th:text="${pageTitle}">Trang quản trị</h1>
+                <p th:text="${pageSubtitle}">Theo dõi và quản lý dữ liệu trong hệ thống.</p>
+            </div>
+
+            <div class="header-actions">
+                <a class="nav-link" th:href="@{/products}">Danh sách sản phẩm</a>
+                <a class="btn btn-primary" th:href="@{/products/add}" sec:authorize="hasRole('ADMIN')">Thêm sản phẩm</a>
+                <form th:action="@{/logout}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button class="btn btn-secondary" type="submit">Đăng xuất</button>
+                </form>
+            </div>
+        </header>
+
+        <main>
+            <div th:replace="${content}"></div>
+        </main>
+
+        <p class="footer-note">Spring Boot, Thymeleaf và Spring Security đang chạy trong cùng một giao diện quản trị.</p>
+    </div>
+</div>
+</body>
+</html>
