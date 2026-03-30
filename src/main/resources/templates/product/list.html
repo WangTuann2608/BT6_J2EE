@@ -3,6 +3,21 @@
 <head th:replace="~{_layout :: head('Danh sách sản phẩm')}"></head>
 <body th:replace="~{_layout :: shell('Danh sách sản phẩm', 'Không gian quản lý sản phẩm với phân quyền user và admin.', ~{::content})}">
 <section th:fragment="content">
+    <div th:if="${param.added}" class="toast-notification" id="cart-toast">
+        <span style="font-size: 20px;">✅</span>
+        <span>Sản phẩm đã được thêm vào giỏ!</span>
+    </div>
+    <script th:if="${param.added}">
+        setTimeout(() => {
+            const toast = document.getElementById('cart-toast');
+            if (toast) {
+                toast.style.transition = 'opacity 0.5s ease';
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 500);
+            }
+        }, 3000);
+    </script>
+
     <section class="hero">
         <article class="hero-card">
             <h2>Kho sản phẩm đang được bảo vệ bởi Spring Security</h2>
@@ -14,9 +29,41 @@
 
         <aside class="stat-card">
             <span class="stat-label">Tổng số sản phẩm</span>
-            <div class="stat-value" th:text="${#lists.size(products)}">0</div>
+            <div class="stat-value" th:text="${totalElements}">0</div>
             <div class="stat-note">Cập nhật trực tiếp từ cơ sở dữ liệu</div>
         </aside>
+    </section>
+
+    <section class="filter-section">
+        <form th:action="@{/products}" method="get" class="filter-form">
+            <div class="form-group">
+                <label>Tìm kiếm</label>
+                <input type="text" name="keyword" th:value="${keyword}" placeholder="Nhập tên sản phẩm..." class="form-input">
+            </div>
+            <div class="form-group">
+                <label>Danh mục</label>
+                <select name="categoryId" class="form-select">
+                    <option value="">-- Tất cả danh mục --</option>
+                    <option th:each="cat : ${categories}"
+                            th:value="${cat.id}"
+                            th:text="${cat.name}"
+                            th:selected="${categoryId == cat.id}"></option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Sắp xếp</label>
+                <select name="sort" class="form-select">
+                    <option value="name,asc" th:selected="${sort == 'name,asc'}">Tên (A-Z)</option>
+                    <option value="name,desc" th:selected="${sort == 'name,desc'}">Tên (Z-A)</option>
+                    <option value="price,asc" th:selected="${sort == 'price,asc'}">Giá tăng dần</option>
+                    <option value="price,desc" th:selected="${sort == 'price,desc'}">Giá giảm dần</option>
+                </select>
+            </div>
+            <div class="form-actions" style="margin-top: 0; align-self: flex-end;">
+                <button type="submit" class="btn btn-primary" style="padding: 14px 24px;">Lọc & Tìm</button>
+                <a th:href="@{/products}" class="btn btn-secondary" style="padding: 14px 24px;">Đặt lại</a>
+            </div>
+        </form>
     </section>
 
     <section class="table-card">
@@ -40,7 +87,7 @@
                 <th>Giá</th>
                 <th>Hình ảnh</th>
                 <th>Danh mục</th>
-                <th sec:authorize="hasRole('ADMIN')">Thao tác</th>
+                <th>Thao tác</th>
             </tr>
             </thead>
             <tbody>
@@ -51,20 +98,41 @@
                 </td>
                 <td th:text="${product.price} + ' VND'">100000 VND</td>
                 <td>
-                    <span class="product-meta" th:text="${product.image != null and !#strings.isEmpty(product.image) ? product.image : 'Chưa có ảnh'}">image.jpg</span>
+                    <img th:if="${product.image != null and !#strings.isEmpty(product.image)}"
+                         th:src="${product.image.startsWith('http') ? product.image : ('/images/' + product.image)}"
+                         class="product-img" alt="Ảnh sản phẩm">
+                    <div th:unless="${product.image != null and !#strings.isEmpty(product.image)}"
+                         class="product-img" style="display: flex; align-items: center; justify-content: center; font-size: 24px; background: var(--panel-strong);">
+                         📦
+                    </div>
                 </td>
                 <td>
                     <span class="product-meta" th:text="${product.category != null ? product.category.name : 'Chưa phân loại'}">Danh mục</span>
                 </td>
-                <td sec:authorize="hasRole('ADMIN')">
+                <td>
                     <div class="row-actions">
-                        <a class="row-link" th:href="@{/products/edit/{id}(id=${product.id})}">Sửa</a>
-                        <a class="row-link row-link-danger" th:href="@{/products/delete/{id}(id=${product.id})}" onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này không?');">Xóa</a>
+                        <a class="row-link" th:href="@{/cart/add/{id}(id=${product.id})}">Thêm vào giỏ</a>
+                        <a class="row-link" th:href="@{/products/edit/{id}(id=${product.id})}" sec:authorize="hasRole('ADMIN')">Sửa</a>
+                        <a class="row-link row-link-danger" th:href="@{/products/delete/{id}(id=${product.id})}" sec:authorize="hasRole('ADMIN')" onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này không?');">Xóa</a>
                     </div>
                 </td>
             </tr>
             </tbody>
         </table>
+
+        <div class="pagination-container" th:if="${totalPages > 1}">
+            <ul class="pagination">
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link" th:href="@{/products(keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, page=${currentPage - 1})}">Previous</a>
+                </li>
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${currentPage == i} ? 'active'">
+                    <a class="page-link" th:href="@{/products(keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, page=${i})}" th:text="${i + 1}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                    <a class="page-link" th:href="@{/products(keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, page=${currentPage + 1})}">Next</a>
+                </li>
+            </ul>
+        </div>
     </section>
 </section>
 </body>

@@ -1,5 +1,9 @@
 package com.example.BT6_Security.controller;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import com.example.BT6_Security.model.Category;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -8,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import com.example.BT6_Security.model.Product;
 import com.example.BT6_Security.service.ProductService;
 import com.example.BT6_Security.service.CategoryService;
-import java.util.List;
 
 @Controller
 @RequestMapping("/products")
@@ -21,9 +24,31 @@ public class ProductController {
     private CategoryService categoryService;
 
     @GetMapping
-    public String listProducts(Model model) {
-        List<Product> products = productService.getAllProducts();
-        model.addAttribute("products", products);
+    public String listProducts(
+            @RequestParam(name = "keyword", required = false) String keyword,
+            @RequestParam(name = "categoryId", required = false) Integer categoryId,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "sort", defaultValue = "name,asc") String sort,
+            Model model) {
+
+        String[] sortParams = sort.split(",");
+        String sortField = sortParams[0];
+        String sortDir = sortParams.length > 1 ? sortParams[1] : "asc";
+
+        Sort sortObj = Sort.by(sortDir.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortField);
+        Pageable pageable = PageRequest.of(page, 5, sortObj);
+
+        Page<Product> productPage = productService.searchAndFilterProducts(keyword, categoryId, pageable);
+
+        model.addAttribute("products", productPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", productPage.getTotalPages());
+        model.addAttribute("totalElements", productPage.getTotalElements());
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("categoryId", categoryId);
+        model.addAttribute("sort", sort);
+        model.addAttribute("categories", categoryService.getAllCategories());
+
         return "product/list";
     }
 

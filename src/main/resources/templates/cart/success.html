@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{_layout :: head('Đặt hàng thành công')}"></head>
+<body th:replace="~{_layout :: shell('Thanh toán hoàn tất', 'Đơn hàng của bạn đã được ghi nhận vào hệ thống.', ~{::content})}">
+<section th:fragment="content">
+    <section class="hero-card" style="text-align: center; padding: 60px 20px;">
+        <div style="font-size: 80px; margin-bottom: 24px;">🎉</div>
+        <h2 style="font-size: 36px; margin-bottom: 16px;">Cảm ơn bạn đã mua sắm!</h2>
+        <p style="font-size: 18px; color: var(--muted); max-width: 600px; margin: 0 auto 32px;">
+            Đơn hàng của bạn đã được tiếp nhận thành công. Chúng tôi sẽ sớm liên hệ để giao hàng đến cho bạn.
+        </p>
+        <div class="row-actions" style="justify-content: center;">
+            <a class="btn btn-primary" th:href="@{/products}" style="padding: 14px 32px;">Tiếp tục mua sắm</a>
+            <a class="btn btn-secondary" th:href="@{/products}" style="padding: 14px 32px;">Xem các đơn hàng</a>
+        </div>
+    </section>
+</section>
+</body>
+</html>

@@ -9,7 +9,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
@@ -27,12 +26,13 @@ public class SecurityConfig {
         return authConfig.getAuthenticationManager();
     }
 
-    // Cấu hình SecurityFilterChain để phân quyền các endpoint
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authorize -> authorize
+                // Cho phép truy cập công khai vào trang đăng nhập và đăng ký
+                .requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**").permitAll()
                 // Quyền truy cập cho các endpoint dựa trên bảng phân quyền
-                .requestMatchers("/products").hasAnyRole("USER", "ADMIN")
+                .requestMatchers("/products", "/cart/**").hasAnyRole("USER", "ADMIN")
                 .requestMatchers("/products/add", "/products/save",
                         "/products/edit/**", "/products/update/**",
                         "/products/delete/**").hasRole("ADMIN")
@@ -40,9 +40,19 @@ public class SecurityConfig {
                 // Yêu cầu xác thực với tất cả các request khác
                 .anyRequest().authenticated()
         )
-        // Kích hoạt form đăng nhập mặc định của Spring Security
-        .formLogin(form -> form.defaultSuccessUrl("/home", true))
-        .logout(withDefaults());
+        // Cấu hình form đăng nhập tùy chỉnh
+        .formLogin(form -> form
+                .loginPage("/login")
+                .loginProcessingUrl("/login")
+                .defaultSuccessUrl("/products", true)
+                .failureUrl("/login?error")
+                .permitAll()
+        )
+        .logout(logout -> logout
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login?logout")
+                .permitAll()
+        );
 
         return http.build();
     }

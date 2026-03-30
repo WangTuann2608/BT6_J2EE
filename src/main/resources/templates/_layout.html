@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
 <head th:fragment="head(pageTitle)">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -359,6 +360,7 @@
         }
 
         @media (max-width: 900px) {
+
             .app-header,
             .hero,
             .section-head {
@@ -384,6 +386,7 @@
         }
 
         @media (max-width: 640px) {
+
             .product-table,
             .product-table tbody,
             .product-table tr,
@@ -409,34 +412,160 @@
                 border-bottom: none;
             }
         }
+
+        .filter-section {
+            margin-bottom: 24px;
+            padding: 20px;
+            background: var(--panel);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--line);
+        }
+
+        .filter-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: flex-end;
+        }
+
+        .filter-form .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-form .btn {
+            height: 48px;
+        }
+
+        .pagination-container {
+            margin-top: 24px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .pagination {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            gap: 8px;
+        }
+
+        .page-item .page-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+            padding: 0 12px;
+            border-radius: 999px;
+            background: var(--panel-strong);
+            border: 1px solid var(--line);
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .page-item.active .page-link {
+            background: var(--brand);
+            color: white;
+            border-color: var(--brand);
+        }
+
+        .page-item.disabled .page-link {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .page-item:not(.active):not(.disabled) .page-link:hover {
+            background: var(--bg-accent);
+            transform: translateY(-2px);
+        }
+
+        .product-img {
+            width: 64px;
+            height: 64px;
+            border-radius: 14px;
+            object-fit: cover;
+            border: 1px solid var(--line);
+            background: var(--bg-accent);
+        }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: rgba(38, 70, 83, 0.1);
+            color: var(--accent);
+            border: 1px solid rgba(38, 70, 83, 0.2);
+        }
+
+        .toast-notification {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 2000;
+            padding: 16px 24px;
+            background: white;
+            border-radius: 999px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideIn 0.3s ease-out;
+            border: 1px solid var(--line);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
+
 <body>
-<div th:fragment="shell(pageTitle, pageSubtitle, content)">
-    <div class="app-shell">
-        <header class="app-header">
-            <div class="brand">
-                <span class="brand-tag">BT6 Security</span>
-                <h1 th:text="${pageTitle}">Trang quản trị</h1>
-                <p th:text="${pageSubtitle}">Theo dõi và quản lý dữ liệu trong hệ thống.</p>
-            </div>
+    <div th:fragment="shell(pageTitle, pageSubtitle, content)">
+        <div class="app-shell">
+            <header class="app-header">
+                <div class="brand">
+                    <span class="brand-tag">BT6 Security</span>
+                    <h1 th:text="${pageTitle}">Trang quản trị</h1>
+                    <p th:text="${pageSubtitle}">Theo dõi và quản lý dữ liệu trong hệ thống.</p>
+                </div>
 
-            <div class="header-actions">
-                <a class="nav-link" th:href="@{/products}">Danh sách sản phẩm</a>
-                <a class="btn btn-primary" th:href="@{/products/add}" sec:authorize="hasRole('ADMIN')">Thêm sản phẩm</a>
-                <form th:action="@{/logout}" method="post">
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                    <button class="btn btn-secondary" type="submit">Đăng xuất</button>
-                </form>
-            </div>
-        </header>
+                <div class="header-actions">
+                    <a class="nav-link" th:href="@{/products}" sec:authorize="isAuthenticated()">Sản phẩm</a>
+                    <a class="nav-link" th:href="@{/cart/view}" sec:authorize="isAuthenticated()">Giỏ hàng</a>
+                    <a class="btn btn-primary" th:href="@{/products/add}" sec:authorize="hasRole('ADMIN')">Thêm sản
+                        phẩm</a>
 
-        <main>
-            <div th:replace="${content}"></div>
-        </main>
+                    <a class="nav-link" th:href="@{/login}" sec:authorize="isAnonymous()">Đăng nhập</a>
+                    <a class="btn btn-primary" th:href="@{/register}" sec:authorize="isAnonymous()">Đăng ký</a>
 
-        <p class="footer-note">Spring Boot, Thymeleaf và Spring Security đang chạy trong cùng một giao diện quản trị.</p>
+                    <form th:action="@{/logout}" method="post" sec:authorize="isAuthenticated()">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                        <button class="btn btn-secondary" type="submit">Đăng xuất</button>
+                    </form>
+                </div>
+            </header>
+
+            <main>
+                <div th:replace="${content}"></div>
+            </main>
+
+            <p class="footer-note">Spring Boot, Thymeleaf và Spring Security đang chạy trong cùng một giao diện quản
+                trị.</p>
+        </div>
     </div>
-</div>
 </body>
+
 </html>

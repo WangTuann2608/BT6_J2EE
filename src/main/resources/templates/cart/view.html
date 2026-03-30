@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{_layout :: head('Giỏ hàng')}"></head>
+
+<body th:replace="~{_layout :: shell('Giỏ hàng', 'Quản lý các sản phẩm bạn đã chọn.', ~{::content})}">
+    <section th:fragment="content">
+        <section class="table-card">
+            <div class="section-head">
+                <div>
+                    <h3>Danh sách sản phẩm trong giỏ</h3>
+                    <p>Kiểm tra lại số lượng trước khi đặt hàng.</p>
+                </div>
+                <a class="btn btn-secondary" th:href="@{/products}">Tiếp tục mua sắm</a>
+            </div>
+
+            <div class="empty-state" th:if="${#lists.isEmpty(cartItems)}">
+                Giỏ hàng của bạn đang trống.
+            </div>
+
+            <table class="product-table" th:if="${not #lists.isEmpty(cartItems)}">
+                <thead>
+                    <tr>
+                        <th>Ảnh</th>
+                        <th>Sản phẩm</th>
+                        <th>Giá</th>
+                        <th>Số lượng</th>
+                        <th>Tổng cộng</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="item : ${cartItems}">
+                        <td>
+                            <img th:if="${item.image != null and !#strings.isEmpty(item.image)}"
+                                th:src="${item.image.startsWith('http') ? item.image : ('/images/' + item.image)}"
+                                class="product-img" alt="Ảnh sản phẩm">
+                            <div th:unless="${item.image != null and !#strings.isEmpty(item.image)}" class="product-img"
+                                style="display: flex; align-items: center; justify-content: center; font-size: 24px; background: var(--panel-strong);">
+                                📦
+                            </div>
+                        </td>
+                        <td th:text="${item.name}">Product Name</td>
+                        <td th:text="${item.price} + ' VND'">100,000 VND</td>
+                        <td th:text="${item.quantity}">1</td>
+                        <td th:text="${item.price * item.quantity} + ' VND'">100,000 VND</td>
+                        <td>
+                            <a class="row-link row-link-danger"
+                                th:href="@{/cart/remove/{id}(id=${item.productId})}">Xóa</a>
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr style="border-top: 2px solid var(--line);">
+                        <td colspan="3"
+                            style="text-align: right; font-weight: 800; font-size: 18px; padding-top: 24px;">Tổng số
+                            tiền thanh toán:</td>
+                        <td style="font-weight: 800; font-size: 20px; color: var(--brand); padding-top: 24px;"
+                            th:text="${totalAmount} + ' VND'">0 VND</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <div class="form-actions" th:if="${not #lists.isEmpty(cartItems)}"
+                style="justify-content: flex-end; margin-top: 32px;">
+                <form th:action="@{/cart/checkout}" method="post">
+                    <button type="submit" class="btn btn-primary" style="padding: 16px 48px; font-size: 18px;">Xác nhận
+                        đặt hàng</button>
+                </form>
+            </div>
+        </section>
+    </section>
+</body>
+
+</html>

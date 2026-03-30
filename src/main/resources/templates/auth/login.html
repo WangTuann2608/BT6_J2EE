@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập | BT6 Security</title>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f4efe7;
+            --bg-accent: #e6d5c3;
+            --panel: rgba(255, 252, 247, 0.92);
+            --panel-strong: #fffaf3;
+            --text: #201a17;
+            --muted: #6e5c52;
+            --line: rgba(53, 38, 29, 0.12);
+            --brand: #b6542e;
+            --brand-dark: #8f3e20;
+            --accent: #264653;
+            --danger: #a63446;
+            --shadow: 0 24px 80px rgba(63, 39, 24, 0.12);
+            --radius-lg: 28px;
+            --radius-md: 18px;
+            --radius-sm: 12px;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Be Vietnam Pro", sans-serif;
+            color: var(--text);
+            background: 
+                radial-gradient(circle at top left, rgba(182, 84, 46, 0.12), transparent 40%),
+                radial-gradient(circle at bottom right, rgba(38, 70, 83, 0.1), transparent 40%),
+                var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 440px;
+            padding: 40px;
+            background: var(--panel);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .brand-tag {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: rgba(182, 84, 46, 0.1);
+            color: var(--brand-dark);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 12px;
+        }
+
+        .auth-header h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 800;
+        }
+
+        .auth-header p {
+            margin: 8px 0 0;
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1px solid var(--line);
+            border-radius: var(--radius-sm);
+            background: var(--panel-strong);
+            font: inherit;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            border-color: var(--brand);
+            box-shadow: 0 0 0 4px rgba(182, 84, 46, 0.12);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 999px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--brand) 0%, #cf7140 100%);
+            color: white;
+            box-shadow: 0 12px 24px rgba(182, 84, 46, 0.2);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .auth-footer {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 14px;
+            color: var(--muted);
+        }
+
+        .auth-footer a {
+            color: var(--brand);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .alert-error {
+            background: rgba(166, 52, 70, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(166, 52, 70, 0.2);
+        }
+
+        .alert-success {
+            background: rgba(38, 70, 83, 0.1);
+            color: var(--accent);
+            border: 1px solid rgba(38, 70, 83, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-card">
+        <div class="auth-header">
+            <span class="brand-tag">BT6 Security</span>
+            <h1>Chào mừng</h1>
+            <p>Đăng nhập để tiếp tục khám phá kho sản phẩm.</p>
+        </div>
+
+        <div th:if="${param.error}" class="alert alert-error">
+            Tên đăng nhập hoặc mật khẩu không chính xác.
+        </div>
+        <div th:if="${param.logout}" class="alert alert-success">
+            Bạn đã đăng xuất thành công.
+        </div>
+        <div th:if="${param.registered}" class="alert alert-success">
+            Đăng ký thành công! Vui lòng đăng nhập.
+        </div>
+
+        <form th:action="@{/login}" method="post">
+            <div class="form-group">
+                <label>Tên đăng nhập</label>
+                <input type="text" name="username" class="form-input" required autofocus>
+            </div>
+            <div class="form-group">
+                <label>Mật khẩu</label>
+                <input type="password" name="password" class="form-input" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Đăng nhập</button>
+        </form>
+
+        <div class="auth-footer">
+            Bạn chưa có tài khoản? <a th:href="@{/register}">Đăng ký ngay</a>
+        </div>
+    </div>
+</body>
+</html>

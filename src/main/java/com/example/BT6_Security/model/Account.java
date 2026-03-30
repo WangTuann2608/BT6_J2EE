@@ -14,6 +14,7 @@ public class Account {
     @Column(name = "login_name")
     private String loginName; // [cite: 258]
     private String password; // [cite: 258]
+    private String email;
 
     // Khai báo quan hệ nhiều-nhiều với Role thông qua bảng trung gian AccountRole
     @ManyToMany(fetch = FetchType.EAGER)
